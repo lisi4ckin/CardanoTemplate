@@ -25,15 +25,15 @@ void ReadMatrix(matrix_t &Matrix, int size, multimap<int, pair<int, int>>&MyMap)
         matrix_t AuxilaryMatrix(MatrixSize, vector<int>(MatrixSize));
         for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
-                AuxilaryMatrix[j][size - i - 1] = Matrix[i][j];
+                AuxilaryMatrix[i][size - j - 1] = Matrix[i][j];
                 if (move == 0) {
-                    MyMap.insert(pair<int, pair<int, int>>(Matrix[i][j], {2 * size - i - 1, j}));
+                    MyMap.insert(pair<int, pair<int, int>>(Matrix[i][j], {j, 2 * size - i - 1 }));
                 }
                 if (move == 1){
-                    MyMap.insert(pair<int, pair<int, int>>(Matrix[i][j], {j + size, 2 * size - i - 1}));
+                    MyMap.insert(pair<int, pair<int, int>>(Matrix[i][j], {2 * size - i - 1, j + size }));
                 }
                 if (move == 2){
-                    MyMap.insert(pair<int, pair<int, int>>(Matrix[i][j], {size - i - 1, j + size}));
+                    MyMap.insert(pair<int, pair<int, int>>(Matrix[i][j], {2 * size - j - 1, i }));
                 }
             }
 		}
@@ -50,11 +50,19 @@ void WriteMatrix(const T&Matrix){
     }
 }
 
+template<typename T> //Нормализация кооррдинат, надеюсь, что пригодиться:)
+pair<T, T>NormalCoord(pair<T, T>& Coord) {
+    if (Coord.first >= MatrixSize) {
+        Coord.first -= MatrixSize;
+    }
+    if (Coord.second >= MatrixSize) {
+        Coord.second -= MatrixSize;
+    }
+    return Coord;
+}
+
 matrix_t GenerateTemplateCardano(multimap<int, pair<int, int>>& MyMap) {
     vector< pair<int, int> >res;
-    for (auto it = MyMap.begin(); it != MyMap.end(); ++it){
-        //empty for
-    }
     for (int i = 1; i <=MatrixSize * MatrixSize; i++){
         int count = 0;
         vector<pair <int, int>> coord;
@@ -64,7 +72,23 @@ matrix_t GenerateTemplateCardano(multimap<int, pair<int, int>>& MyMap) {
                 count++;
             }
         }
-        res.push_back(coord[rand() % 4]);
+        bool f = false;
+        while (!f) {
+            pair <int, int>position = coord[rand() % 4];
+            for (int i = 0; i < res.size(); i++) {
+                if (position.second == res[i].first && position.first == res[i].second) {
+                    f = true;
+                    break;
+                }
+            }
+            if (f) {
+                f = false;
+            }
+            else {
+                res.push_back(position);
+                f = true;
+            }
+        }
     }
     matrix_t Template(2 * MatrixSize, vector <int>(2 * MatrixSize, 0));
     for (int i = 0; i < res.size(); i++){
@@ -77,7 +101,7 @@ matrix_t TurnMatrix(matrix_t &Matrix){
     matrix_t AuxilaryMatrix(Matrix.size(), vector<int>(Matrix.size()));
     for (int i = 0; i < Matrix.size(); i++){
         for (int j = 0; j < Matrix.size(); j++){
-            AuxilaryMatrix[j][Matrix.size() - i - 1] = Matrix[i][j];
+            AuxilaryMatrix[i][j] = Matrix[Matrix.size() -j - 1][i];
         }
     }
     return AuxilaryMatrix;
@@ -114,15 +138,22 @@ matrix_c CodingText(string text, matrix_t &Matrix){
     return Result;
 }
 
+matrix_c EncodingText(matrix_c& Text, matrix_t& Template) {
+
+}
+
 int main() {
     srand(time(NULL));
     multimap <int, pair<int, int>> Coordinates;
     matrix_t Matrix(MatrixSize, vector<int>(MatrixSize));
 	ReadMatrix(Matrix, MatrixSize, Coordinates);
+    for (auto it = Coordinates.begin(); it != Coordinates.end(); ++it) {
+        cout << it->first << " Coordinates: " << it->second.first << " "  << it->second.second << endl;
+    }
 	Matrix = TurnMatrix(Matrix);
 	WriteMatrix(Matrix);
 	matrix_t Template = GenerateTemplateCardano(Coordinates);
 	WriteMatrix(Template);
-	WriteMatrix(CodingText("mamalrkamamalrkamamalrkamamalrkamama", Template));
+	WriteMatrix(CodingText("mamalrkamamalrkamamalrkamamalrkamamahfdasgfsdhgf", Template));
     return 0;
 }
