@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
@@ -9,6 +10,7 @@ using namespace std;
 const int MatrixSize = 3;
 
 typedef vector<vector<int>> matrix_t;
+typedef vector<vector<char>>matrix_c;
 
 void ReadMatrix(matrix_t &Matrix, int size, multimap<int, pair<int, int>>&MyMap) {
 	int k = 1;
@@ -38,9 +40,21 @@ void ReadMatrix(matrix_t &Matrix, int size, multimap<int, pair<int, int>>&MyMap)
 		Matrix = AuxilaryMatrix;
 	}
 }
+template<typename T>
+void WriteMatrix(const T&Matrix){
+    for (int i = 0; i < Matrix.size(); i++){
+        for (int j = 0; j < Matrix.size(); j++){
+            cout << Matrix[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
 
 matrix_t GenerateTemplateCardano(multimap<int, pair<int, int>>& MyMap) {
     vector< pair<int, int> >res;
+    for (auto it = MyMap.begin(); it != MyMap.end(); ++it){
+        //empty for
+    }
     for (int i = 1; i <=MatrixSize * MatrixSize; i++){
         int count = 0;
         vector<pair <int, int>> coord;
@@ -59,25 +73,56 @@ matrix_t GenerateTemplateCardano(multimap<int, pair<int, int>>& MyMap) {
     return Template;
 }
 
+matrix_t TurnMatrix(matrix_t &Matrix){
+    matrix_t AuxilaryMatrix(Matrix.size(), vector<int>(Matrix.size()));
+    for (int i = 0; i < Matrix.size(); i++){
+        for (int j = 0; j < Matrix.size(); j++){
+            AuxilaryMatrix[j][Matrix.size() - i - 1] = Matrix[i][j];
+        }
+    }
+    return AuxilaryMatrix;
+}
+
+matrix_c CodingText(string text, matrix_t &Matrix){
+    matrix_c Result(Matrix.size(), vector<char>(Matrix.size(), ' '));
+    for (int i = 0; i < 4 * MatrixSize * MatrixSize; i++) {
+        [&] {
+            for (int j = 0; j < 2 * MatrixSize; j++) {
+                for (int k = 0; k < 2 * MatrixSize; k++) {
+                    if (Matrix[j][k] == 0){
+                        continue;
+                    }
+                    if ((i + 1) % (MatrixSize * MatrixSize) == 0 && Matrix[j][k] == (MatrixSize * MatrixSize)){
+                        Result[j][k] = text[i];
+                        return;
+                    }
+                    else if (Matrix[j][k] == (i + 1) % (MatrixSize * MatrixSize)) {
+                        Result[j][k] = text[i];
+                        return;
+                    }
+                }
+            }
+        }();
+        if ((i + 1) % (MatrixSize * MatrixSize) == 0){
+            WriteMatrix(Result);
+            cout << i + 1 << endl;
+            Matrix = TurnMatrix(Matrix);
+            cout << "Turn template" << endl;
+            WriteMatrix(Matrix);
+        }
+    }
+    return Result;
+}
+
 int main() {
     srand(time(NULL));
     multimap <int, pair<int, int>> Coordinates;
     matrix_t Matrix(MatrixSize, vector<int>(MatrixSize));
 	ReadMatrix(Matrix, MatrixSize, Coordinates);
-//	for (int i = 0; i < MatrixSize; i++) {
-//		for (int j = 0; j < MatrixSize; j++) {
-//			cout << Matrix[i][j] << " ";
-//		}
-//		cout << endl;
-//	}
+	Matrix = TurnMatrix(Matrix);
+	WriteMatrix(Matrix);
 	matrix_t Template = GenerateTemplateCardano(Coordinates);
-	for (int i = 0; i < 2 * MatrixSize; i++){
-	    for (int j = 0; j < 2 * MatrixSize; j++){
-	        cout << Template[i][j] << " ";
-	    }
-	    cout << endl;
-	}
-//	for (auto it = Coordinates.begin(); it != Coordinates.end(); ++it) {
-//		cout << it->first << " Cordinates: " << it->second.first << " " << it->second.second << "\n";
-//	}
+	WriteMatrix(Template);
+	WriteMatrix(CodingText("mamalrkamamalrkamamalrkamamalrkamama", Template));
+    return 0;
 }
