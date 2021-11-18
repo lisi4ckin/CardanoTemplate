@@ -128,18 +128,27 @@ matrix_c CodingText(string text, matrix_t &Matrix){
             }
         }();
         if ((i + 1) % (MatrixSize * MatrixSize) == 0){
-            WriteMatrix(Result);
-            cout << i + 1 << endl;
             Matrix = TurnMatrix(Matrix);
-            cout << "Turn template" << endl;
-            WriteMatrix(Matrix);
         }
     }
     return Result;
 }
 
-matrix_c EncodingText(matrix_c& Text, matrix_t& Template) {
-
+string EncodingText(matrix_c& Text, matrix_t& Template) {
+    string result = "";
+    for (int move = 0; move < 4; move++) {
+        for (int number = 1; number <=MatrixSize*MatrixSize; number++){
+            for (int i = 0; i < Template.size(); i++) {
+                for (int j = 0; j < Template.size(); j++) {
+                    if (Template[i][j] == number) {
+                        result += Text[i][j];
+                    }
+                }
+            }
+        }
+        Template = TurnMatrix(Template);
+    }
+    return result;
 }
 
 int main() {
@@ -147,13 +156,12 @@ int main() {
     multimap <int, pair<int, int>> Coordinates;
     matrix_t Matrix(MatrixSize, vector<int>(MatrixSize));
 	ReadMatrix(Matrix, MatrixSize, Coordinates);
-    for (auto it = Coordinates.begin(); it != Coordinates.end(); ++it) {
-        cout << it->first << " Coordinates: " << it->second.first << " "  << it->second.second << endl;
-    }
-	Matrix = TurnMatrix(Matrix);
-	WriteMatrix(Matrix);
 	matrix_t Template = GenerateTemplateCardano(Coordinates);
+    cout << "Template is: \n";
 	WriteMatrix(Template);
-	WriteMatrix(CodingText("mamalrkamamalrkamamalrkamamalrkamamahfdasgfsdhgf", Template));
+    matrix_c Text = CodingText("mamalrkamamalrkamamalrkamamalrkamamahfdasgfsdhgf", Template);
+    cout << "Coded text is: \n";
+    WriteMatrix(Text);
+    cout << EncodingText(Text, Template) << endl;
     return 0;
 }

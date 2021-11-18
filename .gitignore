@@ -4,3 +4,5 @@
 .vs
 CMakeLists.txt
 Debug
+x64
+*.json
