@@ -1,13 +1,13 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
-#include <algorithm>
 #include <cstdlib>
 #include <map>
 
 using namespace std;
 
-const int MatrixSize = 3;
+const int MatrixSize = 16;
 
 typedef vector<vector<int>> matrix_t;
 typedef vector<vector<char>>matrix_c;
@@ -50,7 +50,7 @@ void WriteMatrix(const T&Matrix){
     }
 }
 
-template<typename T> //Нормализация кооррдинат, надеюсь, что пригодиться:)
+template<typename T>
 pair<T, T>NormalCoord(pair<T, T>& Coord) {
     if (Coord.first >= MatrixSize) {
         Coord.first -= MatrixSize;
@@ -108,7 +108,7 @@ matrix_t TurnMatrix(matrix_t &Matrix){
 }
 
 matrix_c CodingText(string text, matrix_t &Matrix){
-    matrix_c Result(Matrix.size(), vector<char>(Matrix.size(), ' '));
+    matrix_c Result(2 * MatrixSize, vector<char>(2 * MatrixSize, ' '));
     for (int i = 0; i < 4 * MatrixSize * MatrixSize; i++) {
         [&] {
             for (int j = 0; j < 2 * MatrixSize; j++) {
@@ -117,11 +117,11 @@ matrix_c CodingText(string text, matrix_t &Matrix){
                         continue;
                     }
                     if ((i + 1) % (MatrixSize * MatrixSize) == 0 && Matrix[j][k] == (MatrixSize * MatrixSize)){
-                        Result[j][k] = text[i];
+                        Result[j][k] = char(text[i]);
                         return;
                     }
                     else if (Matrix[j][k] == (i + 1) % (MatrixSize * MatrixSize)) {
-                        Result[j][k] = text[i];
+                        Result[j][k] = char(text[i]);
                         return;
                     }
                 }
@@ -151,6 +151,17 @@ string EncodingText(matrix_c& Text, matrix_t& Template) {
     return result;
 }
 
+string ReadTextFromFile(string FileName){
+    string str = "", result = "";
+    ifstream input(FileName);
+    while(!input.eof()){
+        string str = "";
+        getline(input, str);
+        result += str;
+    }
+    return result;
+}
+
 int main() {
     srand(time(NULL));
     multimap <int, pair<int, int>> Coordinates;
@@ -159,9 +170,10 @@ int main() {
 	matrix_t Template = GenerateTemplateCardano(Coordinates);
     cout << "Template is: \n";
 	WriteMatrix(Template);
-    matrix_c Text = CodingText("mamalrkamamalrkamamalrkamamalrkamamahfdasgfsdhgf", Template);
+	matrix_c Text = CodingText(ReadTextFromFile("/home/lisic4kin/Projects/CardanoTemplate/input.txt"), Template);
     cout << "Coded text is: \n";
     WriteMatrix(Text);
+    cout << "Encoded text is: ";
     cout << EncodingText(Text, Template) << endl;
     return 0;
 }
