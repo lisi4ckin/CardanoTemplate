@@ -7,8 +7,6 @@
 
 using namespace std;
 
-const int MatrixSize = 16;
-
 typedef vector<vector<int>> matrix_t;
 typedef vector<vector<char>>matrix_c;
 
@@ -22,7 +20,7 @@ void ReadMatrix(matrix_t &Matrix, int size, multimap<int, pair<int, int>>&MyMap)
 		}
 	}
 	for (int move = 0; move < 3; move++) {
-        matrix_t AuxilaryMatrix(MatrixSize, vector<int>(MatrixSize));
+        matrix_t AuxilaryMatrix(size, vector<int>(size));
         for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
                 AuxilaryMatrix[i][size - j - 1] = Matrix[i][j];
@@ -42,16 +40,16 @@ void ReadMatrix(matrix_t &Matrix, int size, multimap<int, pair<int, int>>&MyMap)
 }
 template<typename T>
 void WriteMatrix(const T&Matrix){
+    ofstream out("output.txt");
     for (int i = 0; i < Matrix.size(); i++){
         for (int j = 0; j < Matrix.size(); j++){
-            cout << Matrix[i][j] << " ";
+            out << Matrix[i][j];
         }
-        cout << endl;
     }
 }
 
 template<typename T>
-pair<T, T>NormalCoord(pair<T, T>& Coord) {
+pair<T, T>NormalCoord(pair<T, T>& Coord, int MatrixSize) {
     if (Coord.first >= MatrixSize) {
         Coord.first -= MatrixSize;
     }
@@ -61,7 +59,7 @@ pair<T, T>NormalCoord(pair<T, T>& Coord) {
     return Coord;
 }
 
-matrix_t GenerateTemplateCardano(multimap<int, pair<int, int>>& MyMap) {
+matrix_t GenerateTemplateCardano(multimap<int, pair<int, int>>& MyMap, int MatrixSize) {
     vector< pair<int, int> >res;
     for (int i = 1; i <=MatrixSize * MatrixSize; i++){
         int count = 0;
@@ -107,7 +105,7 @@ matrix_t TurnMatrix(matrix_t &Matrix){
     return AuxilaryMatrix;
 }
 
-matrix_c CodingText(string text, matrix_t &Matrix){
+matrix_c CodingText(string text, matrix_t &Matrix, int MatrixSize){
     matrix_c Result(2 * MatrixSize, vector<char>(2 * MatrixSize, ' '));
     for (int i = 0; i < 4 * MatrixSize * MatrixSize; i++) {
         [&] {
@@ -134,7 +132,7 @@ matrix_c CodingText(string text, matrix_t &Matrix){
     return Result;
 }
 
-string EncodingText(matrix_c& Text, matrix_t& Template) {
+string EncodingText(matrix_c& Text, matrix_t& Template, int MatrixSize) {
     string result = "";
     for (int move = 0; move < 4; move++) {
         for (int number = 1; number <=MatrixSize*MatrixSize; number++){
@@ -164,16 +162,18 @@ string ReadTextFromFile(string FileName){
 
 int main() {
     srand(time(NULL));
+    string Text = ReadTextFromFile("D:/Other/Programing/Projects/Summer2021/CourseWork/input.txt");
+    int MatrixSize = sqrt(Text.length() / 4);
     multimap <int, pair<int, int>> Coordinates;
     matrix_t Matrix(MatrixSize, vector<int>(MatrixSize));
 	ReadMatrix(Matrix, MatrixSize, Coordinates);
-	matrix_t Template = GenerateTemplateCardano(Coordinates);
+	matrix_t Template = GenerateTemplateCardano(Coordinates, MatrixSize);
     cout << "Template is: \n";
 	WriteMatrix(Template);
-	matrix_c Text = CodingText(ReadTextFromFile("/home/lisic4kin/Projects/CardanoTemplate/input.txt"), Template);
+	matrix_c Text_Coding = CodingText(ReadTextFromFile("D:/Other/Programing/Projects/Summer2021/CourseWork/input.txt"), Template, MatrixSize);
     cout << "Coded text is: \n";
-    WriteMatrix(Text);
+    WriteMatrix(Text_Coding);
     cout << "Encoded text is: ";
-    cout << EncodingText(Text, Template) << endl;
+    cout << EncodingText(Text_Coding, Template, MatrixSize) << endl;
     return 0;
 }
